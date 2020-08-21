@@ -71,64 +71,10 @@ export default class Player extends Ship {
     let px = this.shape.translation.x + move_x;
     let py = this.shape.translation.y + move_y;
 
-    let in_polygon = Collision.pointInPolygon([px, py], this.boundaries);
+    let in_polygon = Collision.pointInPolygon([px, py], this.boundaries) && Collision.pointInPolygonPadding([px, py], this.boundaries, 20);
                 
     if (!in_polygon) {
-      let least_dist = -1;
-      let least_index = -1;
-      let least_point = {x: 0, y: 0};
-      
-      for (let i = 0; i < this.map.shape.vertices.length; i++) {
-        let x = this.map.shape.vertices[i].x * this.map.shape.scale;
-        let y = this.map.shape.vertices[i].y * this.map.shape.scale;
-        let nx = this.map.shape.vertices[0].x * this.map.shape.scale;
-        let ny = this.map.shape.vertices[0].y * this.map.shape.scale;
-
-        if (i < this.map.shape.vertices.length - 1) {
-          nx = this.map.shape.vertices[i + 1].x * this.map.shape.scale;
-          ny = this.map.shape.vertices[i + 1].y * this.map.shape.scale;                
-        }
-
-        let closest_point = BasicMath.distToSegment({x: px, y: py}, {x: x, y: y}, {x: nx, y: ny});
-        let dist = Math.sqrt(BasicMath.dist2({x: px, y: py}, closest_point));
-        
-        if (dist < least_dist || least_index == -1) {
-          least_dist = dist;
-          least_index = i;
-          least_point = closest_point;
-        }
-      }
-
-      //console.log(least_point);
-      
-      let x = this.map.shape.vertices[least_index].x * this.map.shape.scale;
-      let y = this.map.shape.vertices[least_index].y * this.map.shape.scale;
-      let nx = this.map.shape.vertices[0].x * this.map.shape.scale;
-      let ny = this.map.shape.vertices[0].y * this.map.shape.scale;
-
-      if (least_index < this.map.shape.vertices.length - 1) {
-        nx = this.map.shape.vertices[least_index + 1].x * this.map.shape.scale;
-        ny = this.map.shape.vertices[least_index + 1].y * this.map.shape.scale;                
-      }
-
-      let b_vec = {x: -(ny - y), y: nx - x};
-      b_vec = BasicMath.scalar(-1 / BasicMath.mag(b_vec), b_vec);
-
-      let a_vec = {x: move_x, y: move_y};
-      let a_proj = BasicMath.scalar(BasicMath.dot(a_vec, b_vec) / (BasicMath.mag(b_vec) * BasicMath.mag(b_vec)), b_vec);
-
-      let a_perp = BasicMath.subtract(a_vec, a_proj);
-      move_x = a_perp.x;
-      move_y = a_perp.y;
-
-      let new_a_vec = {x: this.targetX - least_point.x, y: this.targetY - least_point.y};
-      let new_b_vec = {x: nx - x, y: ny - y};
-      new_b_vec = BasicMath.scalar(1 / BasicMath.mag(new_b_vec), new_b_vec);
-
-      let new_a_proj = BasicMath.scalar(BasicMath.dot(new_a_vec, new_b_vec) / (BasicMath.mag(new_b_vec) * BasicMath.mag(new_b_vec)), new_b_vec);
-
-      this.targetX = least_point.x + new_a_proj.x;
-      this.targetY = least_point.y + new_a_proj.y;
+      [move_x, move_y] = this.mapCollision(px, py, move_x, move_y);
     }
     
     this.two.scene.translation.x -= move_x;
@@ -161,5 +107,90 @@ export default class Player extends Ship {
     }
     
     return false;
-  };  
+  }
+
+  mapCollision(px, py, move_x, move_y) {
+    let least_index = [];
+    let least_point = [];
+    
+    for (let i = 0; i < this.boundaries.length; i++) {
+      let x = this.boundaries[i][0];
+      let y = this.boundaries[i][1];
+      let nx = this.boundaries[0][0];
+      let ny = this.boundaries[0][1];
+
+      if (i < this.boundaries.length - 1) {
+        nx = this.boundaries[i + 1][0];
+        ny = this.boundaries[i + 1][1];       
+      }
+
+      let closest_point = BasicMath.distToSegment({x: px, y: py}, {x: x, y: y}, {x: nx, y: ny});
+      let dist = Math.sqrt(BasicMath.dist2({x: px, y: py}, closest_point));
+
+      if (dist < 20) {
+        least_index.push(i);
+        least_point.push(closest_point);
+      }
+    }
+
+    //console.log(least_point);
+
+    let valid_move_found = false;
+    
+    for (let i = 0; i < least_index.length; i++) {
+      let x = this.boundaries[least_index[i]][0];
+      let y = this.boundaries[least_index[i]][1];
+      let nx = this.boundaries[0][0];
+      let ny = this.boundaries[0][1];
+  
+      if (least_index[i] < this.boundaries.length - 1) {
+        nx = this.boundaries[least_index[i] + 1][0];
+        ny = this.boundaries[least_index[i] + 1][1];     
+      }
+  
+      // get boundary vector normalized
+      let b_vec = {x: nx - x, y: ny - y};
+      b_vec = BasicMath.scalar(1 / BasicMath.mag(b_vec), b_vec);
+  
+      // project onto boundary vector
+      let a_vec = {x: move_x, y: move_y};
+      let a_proj = BasicMath.scalar(BasicMath.dot(a_vec, b_vec) / (BasicMath.mag(b_vec) * BasicMath.mag(b_vec)), b_vec);
+  
+      let new_move_x = a_proj.x;
+      let new_move_y = a_proj.y;
+  
+      // get boundary vector normalized
+      let new_a_vec = {x: this.targetX - least_point[i].x, y: this.targetY - least_point[i].y};
+      let new_b_vec = {x: nx - x, y: ny - y};
+      new_b_vec = BasicMath.scalar(1 / BasicMath.mag(new_b_vec), new_b_vec);
+  
+      // project onto boundary vector
+      let new_a_proj = BasicMath.scalar(BasicMath.dot(new_a_vec, new_b_vec) / (BasicMath.mag(new_b_vec) * BasicMath.mag(new_b_vec)), new_b_vec);
+  
+      let new_targetX = this.shape.translation.x + new_a_proj.x;
+      let new_targetY = this.shape.translation.y + new_a_proj.y;
+
+      if (Collision.pointInPolygon([new_targetX, new_targetY], this.boundaries) && Collision.pointInPolygonPadding([new_targetX, new_targetY], this.boundaries, 20)) {
+        move_x = new_move_x;
+        move_y = new_move_y;
+
+        this.targetX = new_targetX;
+        this.targetY = new_targetY;
+
+        valid_move_found = true;
+
+        break;
+      }
+    }
+
+    if (!valid_move_found) {
+      move_x = 0;
+      move_y = 0;
+      this.targetX = this.shape.translation.x;
+      this.targetY = this.shape.translation.y;
+      console.log('no move found');
+    }
+
+    return [move_x, move_y];
+  }
 }

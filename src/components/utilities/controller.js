@@ -15,18 +15,19 @@ export default class Controller {
 
   keydown(e) {
 		//console.log(e.which); //left 37, right 39, up 38, down 40
+		//left 65, right 68, up 87, down 83
 		
 		switch(e.which) {
-			case 37: //left
+			case 65: //left
 				this.left_press = true;
 				break;
-			case 39: //right
+			case 68: //right
         this.right_press = true;
 				break;
-			case 38: //up
+			case 87: //up
         this.up_press = true;
 				break;
-			case 40: //down 
+			case 83: //down 
         this.down_press = true;
 				break;
 			default:
@@ -38,16 +39,16 @@ export default class Controller {
 		//console.log(e.which); //left 37, right 39, up 38, down 40 
 
 		switch(e.which) {
-			case 37: //left
+			case 65: //left
         this.left_press = false;
 				break;
-			case 39: //right
+			case 68: //right
         this.right_press = false;
 				break;
-			case 38: //up
+			case 87: //up
         this.up_press = false;
 				break;
-			case 40: //down 
+			case 83: //down 
         this.down_press = false;
 				break;
 			default:
