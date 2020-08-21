@@ -25,6 +25,8 @@
     "perlin-noise": "0.0.1",
     "physijs-webpack": "^0.1.3",
     "simplex-noise": "^2.4.0",
-    "three": "^0.110.0"
+    "three": "^0.110.0",
+    "twojs-ts": "^0.7.0-13",
+    "victor": "^1.1.0"
   }
 }

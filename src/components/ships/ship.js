@@ -1,0 +1,50 @@
+export default class Ship {  
+  constructor(x, y, two) {
+    this.two = two;
+    this.animateOffset = Math.random() * 10;
+
+    this.shape = new Two.Path([], true, false);
+    
+    this.shape.fill = 'rgba(0, 0, 0, 0)';
+    this.shape.stroke = 'rgba(0, 0, 0, 0)';
+    this.shape.linewidth = 2;
+    this.shape.scale = 1;
+    
+    this.shape.translation.x = x;
+    this.shape.translation.y = y;
+    this.targetX = x;
+    this.targetY = y;
+    this.targetRot = 0;
+    
+    this.movementSpeedX = 0.004 + (Math.random() * 0.002);
+    this.movementSpeedY = 0.004 + (Math.random() * 0.002);
+
+    this.movementSpeed = 1;
+    this.rotationSpeed = 1;
+  }
+
+  init() {
+    this.two.add(this.shape);
+    this.two.update();
+  }
+
+  replaceShape(newPath) {
+    let oldShape = this.shape;
+
+    this.shape = newPath;
+
+    this.shape.fill = oldShape.fill;
+    this.shape.stroke = oldShape.stroke;
+    this.shape.linewidth = oldShape.linewidth;
+    this.shape.translation.x = oldShape.translation.x;
+    this.shape.translation.y = oldShape.translation.y;
+    this.shape.scale = oldShape.scale;
+  }
+
+  updateTarget(p) {
+    this.targetX = p.shape.translation.x;  
+    this.targetY = p.shape.translation.y;
+  }
+
+  animate(seconds) { }
+}
