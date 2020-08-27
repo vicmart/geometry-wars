@@ -1,11 +1,12 @@
 import Ship from './ship';
 
 export default class Diamond extends Ship {
-  constructor(x, y, two) {
-    super(x, y, two);
+  constructor(x, y, two, map) {
+    super(x, y, two, map);
 
-    this.movementSpeedX = 0.004 + (Math.random() * 0.002);
-    this.movementSpeedY = 0.004 + (Math.random() * 0.002);
+    this.size = 20;
+    this.movementSpeedX = 0.002 + (Math.random() * 0.004);
+    this.movementSpeedY = 0.002 + (Math.random() * 0.004);
     this.shape.stroke = 'cyan';
 
     this.init();
@@ -29,8 +30,13 @@ export default class Diamond extends Ship {
     this.shape.vertices[2].y = (Math.sin(seconds + this.animateOffset) * -5) + 20;
     this.shape.vertices[3].x = (Math.sin(seconds + this.animateOffset) * -5) - 20;
 
-    this.shape.translation.x += (this.targetX - this.shape.translation.x) * this.movementSpeedX;
-    this.shape.translation.y += (this.targetY - this.shape.translation.y) * this.movementSpeedY;
+    let move_x = Math.max(-1 * this.maxSpeed, Math.min(this.maxSpeed, (this.targetX - this.shape.translation.x) * this.movementSpeedX));
+    let move_y = Math.max(-1 * this.maxSpeed, Math.min(this.maxSpeed, (this.targetY - this.shape.translation.y) * this.movementSpeedY));
+    let px = this.shape.translation.x + move_x;
+    let py = this.shape.translation.y + move_y;
+    [move_x, move_y] = this.map.collision(px, py, move_x, move_y, this);
+    this.shape.translation.x += move_x;
+    this.shape.translation.y += move_y;
     
     return false;
   }

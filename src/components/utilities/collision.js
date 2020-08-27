@@ -15,7 +15,7 @@ export default class Collision {
         ny = parseFloat(vs[i + 1][1]);                
       }
 
-      let closest_point = BasicMath.distToSegment({x: px, y: py}, {x: x, y: y}, {x: nx, y: ny});
+      let closest_point = BasicMath.distToSegmentSquared({x: px, y: py}, {x: x, y: y}, {x: nx, y: ny});
       let dist = Math.sqrt(BasicMath.dist2({x: px, y: py}, closest_point));
 
       if (dist < padding) {
