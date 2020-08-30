@@ -26,13 +26,8 @@ window.onload = function() {
 								new Envelope(200, 300, 0.5, two, map),
 								new Arrow(300, 300, two, map)];
 	
-	for (let i = 0; i < 50; i++) {
-		let [px, py] = [0, 0];
-		let valid_position = false;
-		while (!valid_position) {
-			[px, py] = [Math.random() * 1000, Math.random() * 1000];
-			valid_position = Collision.pointInPolygon([px, py], map.boundaries) && Collision.pointInPolygonPadding([px, py], map.boundaries, 20);
-		}
+	for (let i = 0; i < 200; i++) {
+		let [px, py] = [Math.random() * map.width, Math.random() * map.height];
 
 		shapes.push(new Diamond(px, py, two, map));
 	}

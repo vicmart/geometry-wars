@@ -10,7 +10,7 @@ export default class Player extends Ship {
 
     this.movementSpeed = 0.06;
     this.rotationSpeed = 0.5;
-    this.size = 20;
+    this.size = 40;
     this.triggerAction = true;
     this.animating = false;
     this.animateStart = 0;
@@ -86,14 +86,7 @@ export default class Player extends Ship {
         this.shape.rotation += (this.targetRot - this.shape.rotation) * this.rotationSpeed;
       }
     }
-
-    this.determineEnemyPathPosition();
     
     return false;
-  }
-
-  determineEnemyPathPosition() {
-    let least_index = this.map.determineEnemyPathPosition(this.shape);
-    this.map.active_enemy_path_segment = least_index;
   }
 }

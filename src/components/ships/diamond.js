@@ -32,9 +32,9 @@ export default class Diamond extends Ship {
 
     let move_x = Math.max(-1 * this.maxSpeed, Math.min(this.maxSpeed, (this.targetX - this.shape.translation.x) * this.movementSpeedX));
     let move_y = Math.max(-1 * this.maxSpeed, Math.min(this.maxSpeed, (this.targetY - this.shape.translation.y) * this.movementSpeedY));
-    let px = this.shape.translation.x + move_x;
+    /**let px = this.shape.translation.x + move_x;
     let py = this.shape.translation.y + move_y;
-    [move_x, move_y] = this.map.collision(px, py, move_x, move_y, this);
+    //[move_x, move_y] = this.map.collision(px, py, move_x, move_y, this);**/
     this.shape.translation.x += move_x;
     this.shape.translation.y += move_y;
     
