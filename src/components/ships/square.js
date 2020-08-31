@@ -32,8 +32,8 @@ export default class Square extends Ship {
     super.init();
   }
     
-  animate(seconds) {
-    this.shape.rotation = Math.sin(seconds + this.animateOffset) * 0.5;
+  animate(frames) {
+    this.shape.rotation = Math.sin((frames + this.animateOffset) * this.animationSpeed) * 0.5;
     
     return false;
   }

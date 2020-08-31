@@ -12,21 +12,21 @@ import Arrow from './components/ships/arrow';
 					
 
 window.onload = function() {
+
 	let elem = document.getElementById('field');
-	let params = { width: window.innerWidth, height: window.innerHeight };
+	let params = { type: Two.Types.canvas, fullscreen: true };
 	let two = new Two(params).appendTo(elem);
 
 	let map = new Map(two);
 	let controller = new Controller();
 
-	let shapes = [new Diamond(100, 300, two, map),
-								new Square(300, 100, two, map),
+	let shapes = [new Square(300, 100, two, map),
 								new Pinwheel(300, 200, two, map),
 								new Envelope(200, 200, 1, two, map),
 								new Envelope(200, 300, 0.5, two, map),
 								new Arrow(300, 300, two, map)];
 	
-	for (let i = 0; i < 200; i++) {
+	for (let i = 0; i < 0; i++) {
 		let [px, py] = [Math.random() * map.width, Math.random() * map.height];
 
 		shapes.push(new Diamond(px, py, two, map));
@@ -37,6 +37,30 @@ window.onload = function() {
 	let lastSecond = new Date().getTime() / 1000;
 	let lastFrameCount = two.frameCount;
 
+
+	for (let i = 0; i < shapes.length; i++) {
+		two.bind('update', function(frameCount) {
+			shapes[i].updateTarget(p1);
+			shapes[i].animate(frameCount);
+		});
+	}
+
+	two.bind('update', function(frameCount) {
+		p1.animate(frameCount, map);
+	});
+
+	two.bind('update', function(frameCount) {
+		let seconds = new Date().getTime() / 1000;
+		if (parseInt(seconds) > parseInt(lastSecond)) {
+			ui.updateFPS(parseInt((two.frameCount - lastFrameCount) / (seconds - lastSecond)));
+			lastSecond = seconds;
+			lastFrameCount = two.frameCount;
+		}
+
+		ui.animate(seconds);
+	});
+
+	/**
 	two.bind('update', function(frameCount) {
 		let seconds = new Date().getTime() / 1000;
 		if (parseInt(seconds) > parseInt(lastSecond)) {
@@ -47,13 +71,15 @@ window.onload = function() {
 		//console.log(controller);
     
     for (let i = 0; i < shapes.length; i++) {
-        shapes[i].updateTarget(p1);
-        if (shapes[i].animate(seconds)) {
-          shapes.splice(i, 1);
-        }
+			shapes[i].updateTarget(p1);
+			if (shapes[i].animate(seconds)) {
+				shapes.splice(i, 1);
+			}
     }
     
     p1.animate(seconds, map);
 		ui.animate(seconds);
-	}).play();
+	}).play(); */
+
+	two.play();
 };

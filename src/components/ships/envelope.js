@@ -35,8 +35,8 @@ export default class Envelope extends Ship {
     super.init();
   }
     
-  animate(seconds) {
-    this.shape.rotation = Math.sin(seconds + this.animateOffset);
+  animate(frames) {
+    this.shape.rotation = Math.sin((frames + this.animateOffset) * this.animationSpeed);
 
     return false;
   }

@@ -1,26 +1,29 @@
 import Ship from "./ship";
 
 export default class Bullet extends Ship {
-  constructor(two, x, y, targetX, targetY) {
+  constructor(x, y, two, map, targetDirection, extraSpeedX, extraSpeedY) {
     super(x, y, two);
 
+    this.size = 3;
     this.shape.stroke = '#FFA500';
-    this.movementSpeed = 10;
+    this.shape.linewidth = 3;
 
-    this.targetX = targetX;
-    this.targetY = targetY;
-    
-    let x_diff = this.targetX - this.shape.translation.x;
-    let y_diff = this.targetY - this.shape.translation.y;
+    this.direction = targetDirection;
 
-    this.targetRot = Math.atan(y_diff/x_diff) + Math.PI/2;
+    this.move_x = 20 * Math.cos(this.direction);
+    this.move_y = 20 * Math.sin(this.direction);
 
-    if (x_diff < 0) {
-      this.targetRot -= Math.PI;
-    }
+    let extraSpeedXFactor = this.move_x < 0 ? -1 : 1;
+    let extraSpeedYFactor = this.move_y < 0 ? -1 : 1;
+    this.move_x += extraSpeedX * extraSpeedXFactor * Math.cos(this.direction);
+    this.move_y += extraSpeedY * extraSpeedYFactor * Math.sin(this.direction);
+
+    this.targetRot = this.direction + Math.PI/2;
     
     this.shape.rotation = this.targetRot;
-  
+
+    this.map = map;
+
     this.init();
   }
 
@@ -31,37 +34,23 @@ export default class Bullet extends Ship {
       new Two.Anchor(2, 4),
       new Two.Anchor(-2, 4),
       new Two.Anchor(-3, 3),
-  ], true, false));
+    ], true, false));
+
+    this.shape.rotation = this.targetRot;
 
     super.init();
   }
     
-  animate(seconds) {
-    let diff_x = this.shape.translation.x - this.targetX;
-    let diff_y = this.shape.translation.y - this.targetY;
-    
-    if (Math.abs(diff_x) < this.movementSpeed) {
-        
-    } else if (diff_x > 0) {
-      this.shape.translation.x -= this.movementSpeed;
-    } else {
-      this.shape.translation.x += this.movementSpeed;            
-    }
-    
-    if (Math.abs(diff_y) < this.movementSpeed) {
-        
-    } else if (diff_y > 0) {
-      this.shape.translation.y -= this.movementSpeed;
-    } else {
-      this.shape.translation.y += this.movementSpeed;
-    }
-    
-    if (Math.abs(diff_x) < this.movementSpeed && Math.abs(diff_y) < this.movementSpeed) {
-      two.remove(this.shape);
-      this.shape = undefined;
+  animate(frames) {
+    if (!this.map.validPosition(this.shape.translation.x + this.move_x, this.shape.translation.y + this.move_y, this)) {
+      this.two.unbind('update', this.animateFunction);
+      this.two.remove(this.shape);
       return true;
     }
-    
+
+    this.shape.translation.x += this.move_x;
+    this.shape.translation.y += this.move_y;
+
     return false;
   }
 }

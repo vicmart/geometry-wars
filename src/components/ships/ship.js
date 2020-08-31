@@ -4,7 +4,8 @@ export default class Ship {
   constructor(x, y, two, map) {
     this.two = two;
     this.map = map;
-    this.animateOffset = Math.random() * 10;
+    this.animationSpeed = 0.02;
+    this.animateOffset = Math.random() * 600;
 
     this.shape = new Two.Path([], true, false);
     
@@ -32,7 +33,6 @@ export default class Ship {
 
   init() {
     this.two.add(this.shape);
-    this.two.update();
   }
 
   replaceShape(newPath) {

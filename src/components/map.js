@@ -40,6 +40,12 @@ export default class Map {
     }
   }
 
+  validPosition(px, py, ship) {
+    let ship_radius = ship.size/2;
+    let valid_position = (px - ship_radius > 0) && (px + ship_radius < this.width) && (py - ship_radius > 0) && (py + ship_radius < this.height);
+    return valid_position;
+  }
+
   collision(px, py, move_x, move_y, ship) {
     let ship_radius = ship.size/2;
     let valid_position = (px - ship_radius > 0) && (px + ship_radius < this.width) && (py - ship_radius > 0) && (py + ship_radius < this.height);

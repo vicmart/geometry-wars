@@ -28,8 +28,8 @@ export default class Pinwheel extends Ship {
     super.init();
   }
     
-  animate(seconds) {
-    this.shape.rotation = -seconds + this.animateOffset;
+  animate(frames) {
+    this.shape.rotation = (frames + this.animateOffset) * this.animationSpeed;
 
     return false;
   }

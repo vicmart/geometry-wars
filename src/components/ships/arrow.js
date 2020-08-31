@@ -27,17 +27,17 @@ export default class Arrow extends Ship {
     super.init();
   }
     
-  animate(seconds) {
+  animate(frames) {
     if (this.triggerAction) {
       this.animating = true;
       this.triggerAction = false;
-      this.animateStart = seconds;
+      this.animateStart = this.shape.rotation;
     }
   
     if (this.animating == true) {
-      this.shape.rotation = (seconds - this.animateStart) * 4;
+      this.shape.rotation = ((frames - this.animateStart) * this.animationSpeed) * 4;
       
-      if (seconds - this.animateStart >= Math.PI / 4) {
+      if (Math.abs(this.shape.rotation - this.animateStart) >= Math.PI / 4) {
         this.animating = false;    
       }
     }

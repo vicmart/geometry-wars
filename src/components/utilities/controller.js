@@ -18,17 +18,29 @@ export default class Controller {
 		//left 65, right 68, up 87, down 83
 		
 		switch(e.which) {
-			case 65: //left
+			case 65:
+				this.a_press = true;
+				break;
+			case 68:
+        this.d_press = true;
+				break;
+			case 87:
+        this.w_press = true;
+				break;
+			case 83: 
+        this.s_press = true;
+				break;
+			case 37:
 				this.left_press = true;
 				break;
-			case 68: //right
-        this.right_press = true;
+			case 39:
+				this.right_press = true;
 				break;
-			case 87: //up
-        this.up_press = true;
+			case 38:
+				this.up_press = true;
 				break;
-			case 83: //down 
-        this.down_press = true;
+			case 40: 
+				this.down_press = true;
 				break;
 			default:
 				break;
@@ -39,17 +51,29 @@ export default class Controller {
 		//console.log(e.which); //left 37, right 39, up 38, down 40 
 
 		switch(e.which) {
-			case 65: //left
-        this.left_press = false;
+			case 65:
+        this.a_press = false;
 				break;
-			case 68: //right
-        this.right_press = false;
+			case 68:
+        this.d_press = false;
 				break;
-			case 87: //up
-        this.up_press = false;
+			case 87:
+        this.w_press = false;
 				break;
-			case 83: //down 
-        this.down_press = false;
+			case 83: 
+        this.s_press = false;
+				break;
+			case 37:
+				this.left_press = false;
+				break;
+			case 39:
+				this.right_press = false;
+				break;
+			case 38:
+				this.up_press = false;
+				break;
+			case 40: 
+				this.down_press = false;
 				break;
 			default:
 				break;

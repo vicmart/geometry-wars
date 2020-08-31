@@ -24,11 +24,11 @@ export default class Diamond extends Ship {
     super.init();
   }
     
-  animate(seconds) {
-    this.shape.vertices[0].y = (Math.sin(seconds + this.animateOffset) * 5) - 20;
-    this.shape.vertices[1].x = (Math.sin(seconds + this.animateOffset) * 5) + 20;
-    this.shape.vertices[2].y = (Math.sin(seconds + this.animateOffset) * -5) + 20;
-    this.shape.vertices[3].x = (Math.sin(seconds + this.animateOffset) * -5) - 20;
+  animate(frames) {
+    this.shape.vertices[0].y = (Math.sin((frames + this.animateOffset) * this.animationSpeed) * 5) - 20;
+    this.shape.vertices[1].x = (Math.sin((frames + this.animateOffset) * this.animationSpeed) * 5) + 20;
+    this.shape.vertices[2].y = (Math.sin((frames + this.animateOffset) * this.animationSpeed) * -5) + 20;
+    this.shape.vertices[3].x = (Math.sin((frames + this.animateOffset) * this.animationSpeed) * -5) - 20;
 
     let move_x = Math.max(-1 * this.maxSpeed, Math.min(this.maxSpeed, (this.targetX - this.shape.translation.x) * this.movementSpeedX));
     let move_y = Math.max(-1 * this.maxSpeed, Math.min(this.maxSpeed, (this.targetY - this.shape.translation.y) * this.movementSpeedY));
