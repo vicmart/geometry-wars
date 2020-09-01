@@ -28,7 +28,7 @@ window.onload = function() {
 								new Envelope(200, 300, 0.5, two, map),
 								new Arrow(300, 300, two, map)];
 	
-	for (let i = 0; i < 200; i++) {
+	for (let i = 0; i < 10; i++) {
 		let [px, py] = [Math.random() * map.width, Math.random() * map.height];
 
 		enemies.push(new Diamond(px, py, two, map));

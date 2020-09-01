@@ -12,7 +12,6 @@ export default class Envelope extends Ship {
 
   init() {
     let x_shape = new Two.Path([
-      new Two.Anchor(0, 0),
       new Two.Anchor(-20, -20),
       new Two.Anchor(0, 0),
       new Two.Anchor(20, 20),
@@ -38,7 +37,11 @@ export default class Envelope extends Ship {
   }
     
   animate(frames) {
-    this.shape.rotation = Math.sin((frames + this.animateOffset) * this.animationSpeed);
+    if (!this.dying) {
+      this.shape.rotation = Math.sin((frames + this.animateOffset) * this.animationSpeed);
+    } else {
+      this.decomp();
+    }
 
     return false;
   }

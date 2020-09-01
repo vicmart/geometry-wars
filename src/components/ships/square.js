@@ -23,8 +23,7 @@ export default class Square extends Ship {
       new Two.Anchor(-20, -20),
       new Two.Anchor(20, -20),
       new Two.Anchor(20, 20),
-      new Two.Anchor(-20, 20),
-      new Two.Anchor(-20, -20)
+      new Two.Anchor(-20, 20)
     ], true, false);
     
     this.shape_group = [small_shape, big_shape];
@@ -34,8 +33,12 @@ export default class Square extends Ship {
   }
     
   animate(frames) {
-    this.shape.rotation = Math.sin((frames + this.animateOffset) * this.animationSpeed) * 0.5;
-    
+    if (!this.dying) {
+      this.shape.rotation = Math.sin((frames + this.animateOffset) * this.animationSpeed) * 0.5;
+    } else {
+      this.decomp();
+    }
+
     return false;
   }
 }

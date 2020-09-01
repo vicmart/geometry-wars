@@ -14,7 +14,7 @@ export default class Arrow extends Ship {
   }
 
   init() {
-    this.replaceShape(new Two.Path([
+    this.path = new Two.Path([
       new Two.Anchor(0, -20),
       new Two.Anchor(15, 12),
       new Two.Anchor(8, 20),
@@ -23,24 +23,30 @@ export default class Arrow extends Ship {
       new Two.Anchor(-4, 15),
       new Two.Anchor(-8, 20),
       new Two.Anchor(-15, 12),
-    ], true, false));
+    ], true, false);
+
+    this.replaceShape(this.path);
 
     super.init();
   }
     
   animate(frames) {
-    if (this.triggerAction) {
-      this.animating = true;
-      this.triggerAction = false;
-      this.animateStart = this.shape.rotation;
-    }
-  
-    if (this.animating == true) {
-      this.shape.rotation = ((frames - this.animateStart) * this.animationSpeed) * 4;
-      
-      if (Math.abs(this.shape.rotation - this.animateStart) >= Math.PI / 4) {
-        this.animating = false;    
+    if (!this.dying) {
+      if (this.triggerAction) {
+        this.animating = true;
+        this.triggerAction = false;
+        this.animateStart = this.shape.rotation;
       }
+    
+      if (this.animating == true) {
+        this.shape.rotation = ((frames - this.animateStart) * this.animationSpeed) * 4;
+        
+        if (Math.abs(this.shape.rotation - this.animateStart) >= Math.PI / 4) {
+          this.animating = false;    
+        }
+      }
+    } else {
+      this.decomp();
     }
 
     return false;
