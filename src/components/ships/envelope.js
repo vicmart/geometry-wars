@@ -5,6 +5,7 @@ export default class Envelope extends Ship {
     super(x, y, two);
     this.shape.stroke = '#FF00FF';
     this.shape.scale = scale;
+    this.size = this.size * scale;
 
     this.init();
   }

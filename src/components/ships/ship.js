@@ -7,6 +7,7 @@ export default class Ship {
     this.animationSpeed = 0.02;
     this.animateOffset = Math.random() * 600;
 
+    this.size = 40;
     this.shape = new Two.Path([], true, false);
     
     this.shape.fill = 'rgba(0, 0, 0, 0)';

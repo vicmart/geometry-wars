@@ -16,7 +16,8 @@ export default class Player extends Ship {
     this.triggerAction = true;
     this.animating = false;
     this.animateStart = 0;
-    this.bulletRate = 7;
+    this.bulletRate = 100;
+    this.activeBullets = [];
 
     this.map = map;
     this.controller = controller;
@@ -77,7 +78,7 @@ export default class Player extends Ship {
       horizontal_rotation = Math.PI;
     }
 
-    let total_rotation = 0;
+    let total_rotation = null;
 
     if (horizontal_rotation != -1 && vertical_rotation != -1) {
       total_rotation = (horizontal_rotation + vertical_rotation) / 2;
@@ -90,7 +91,7 @@ export default class Player extends Ship {
       total_rotation = vertical_rotation;      
     }
 
-    this.alterBulletRotation(total_rotation);
+    if (total_rotation != null) this.alterBulletRotation(total_rotation);
 
     let move_x = (this.targetX - this.shape.translation.x) * this.movementSpeed;
     let move_y = (this.targetY - this.shape.translation.y) * this.movementSpeed;
@@ -103,14 +104,18 @@ export default class Player extends Ship {
         let vector_perp_center = BasicMath.perpendicular(vector_from_center);
 
         let bullet1 = new Bullet(this.shape.translation.x + vector_from_center.x + (vector_perp_center.x * 1), this.shape.translation.y + vector_from_center.y + (vector_perp_center.y * 1) - 1, this.two, this.map, this.bulletRotation, move_x, move_y);
+        this.activeBullets.push(bullet1);
+        bullet1.removeSelf = () => { this.removeBullet(bullet1); }
         bullet1.animateFunction = (frameCount) => { bullet1.animate(frameCount)};
         this.two.bind('update', bullet1.animateFunction);
 
         let bullet2 = new Bullet(this.shape.translation.x + vector_from_center.x + (vector_perp_center.x * -1), this.shape.translation.y + vector_from_center.y + (vector_perp_center.y * -1) - 1, this.two, this.map, this.bulletRotation, move_x, move_y);
-        bullet2.animateFunction = (frameCount) => { bullet2.animate(frameCount)};
+        this.activeBullets.push(bullet2);
+        bullet2.removeSelf = () => { this.removeBullet(bullet2); }
+        bullet2.animateFunction = (frameCount) => { bullet2.animate(frameCount); }
         this.two.bind('update', bullet2.animateFunction);
 
-        this.bulletCooldown = now + 50;
+        this.bulletCooldown = now + this.bulletRate;
       }
     }
     
@@ -165,5 +170,13 @@ export default class Player extends Ship {
     current_y += (target_y - current_y) / reach_speed;
 
     this.bulletRotation = Math.atan2(current_y, current_x);
+  }
+
+  removeBullet(bullet) {
+    for(let i = 0; i < this.activeBullets.length; i++) {
+      if (this.activeBullets[i] == bullet) {
+        this.activeBullets.splice(i, 1);
+      }
+    }
   }
 }

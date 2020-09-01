@@ -10,13 +10,13 @@ export default class Bullet extends Ship {
 
     this.direction = targetDirection;
 
-    this.move_x = 20 * Math.cos(this.direction);
-    this.move_y = 20 * Math.sin(this.direction);
+    this.move_x = 15 * Math.cos(this.direction);
+    this.move_y = 15 * Math.sin(this.direction);
 
     let extraSpeedXFactor = this.move_x < 0 ? -1 : 1;
     let extraSpeedYFactor = this.move_y < 0 ? -1 : 1;
-    this.move_x += extraSpeedX * extraSpeedXFactor * Math.cos(this.direction);
-    this.move_y += extraSpeedY * extraSpeedYFactor * Math.sin(this.direction);
+    this.move_x += Math.max(0, extraSpeedX * extraSpeedXFactor) * Math.cos(this.direction);
+    this.move_y += Math.max(0, extraSpeedY * extraSpeedYFactor) * Math.sin(this.direction);
 
     this.targetRot = this.direction + Math.PI/2;
     
@@ -40,11 +40,16 @@ export default class Bullet extends Ship {
 
     super.init();
   }
+
+  destruct() {
+    this.removeSelf();
+    this.two.unbind('update', this.animateFunction);
+    this.two.remove(this.shape);
+  }
     
   animate(frames) {
     if (!this.map.validPosition(this.shape.translation.x + this.move_x, this.shape.translation.y + this.move_y, this)) {
-      this.two.unbind('update', this.animateFunction);
-      this.two.remove(this.shape);
+      this.destruct();
       return true;
     }
 

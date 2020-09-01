@@ -8,6 +8,7 @@ export default class Arrow extends Ship {
     this.triggerAction = true;
     this.animating = false;
     this.animateStart = 0;
+    this.size = 35;
   
     this.init();
   }
