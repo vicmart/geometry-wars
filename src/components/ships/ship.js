@@ -54,5 +54,15 @@ export default class Ship {
     this.targetY = p.shape.translation.y;
   }
 
+  destruct() {
+    this.two.unbind('update', this.animateFunction);
+    if (this.shape_group) {
+      for (let shape of this.shape_group) {
+        this.shape.remove(shape);
+      }
+    }
+    this.two.remove(this.shape);
+  }
+
   animate(seconds) { }
 }

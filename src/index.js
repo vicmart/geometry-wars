@@ -28,7 +28,7 @@ window.onload = function() {
 								new Envelope(200, 300, 0.5, two, map),
 								new Arrow(300, 300, two, map)];
 	
-	for (let i = 0; i < 0; i++) {
+	for (let i = 0; i < 200; i++) {
 		let [px, py] = [Math.random() * map.width, Math.random() * map.height];
 
 		enemies.push(new Diamond(px, py, two, map));
@@ -41,10 +41,12 @@ window.onload = function() {
 
 
 	for (let i = 0; i < enemies.length; i++) {
-		two.bind('update', function(frameCount) {
-			enemies[i].updateTarget(p1);
-			enemies[i].animate(frameCount);
-		});
+		let enemy = enemies[i];
+		enemy.animateFunction = (frameCount) => {
+			enemy.updateTarget(p1);			
+			enemy.animate(frameCount);
+		};
+		two.bind('update', enemies[i].animateFunction);
 	}
 
 	two.bind('update', function(frameCount) {
@@ -136,6 +138,8 @@ window.onload = function() {
 							let dist_y = Math.abs(bullet_pos.y - enemy_pos.y);
 							if (dist_x < enemy.size && dist_y < enemy.size) {
 								bullet.destruct();
+								enemy.destruct();
+								enemies.remove(enemy);
 								break;
 							}
 						}
@@ -156,3 +160,14 @@ function addToNeighboringBucket(x, y, x_offset, y_offset, x_buckets, y_buckets, 
 
 	return buckets;
 }
+
+Array.prototype.remove = function() {
+	var what, a = arguments, L = a.length, ax;
+	while (L && this.length) {
+			what = a[--L];
+			while ((ax = this.indexOf(what)) !== -1) {
+					this.splice(ax, 1);
+			}
+	}
+	return this;
+};

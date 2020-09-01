@@ -31,6 +31,7 @@ export default class Envelope extends Ship {
       new Two.Anchor(-20, -20),
     ], true, false);
 
+    this.shape_group = [x_shape, square_shape];
     this.replaceShape(this.two.makeGroup(x_shape, square_shape));
 
     super.init();

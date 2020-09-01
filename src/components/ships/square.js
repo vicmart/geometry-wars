@@ -27,6 +27,7 @@ export default class Square extends Ship {
       new Two.Anchor(-20, -20)
     ], true, false);
     
+    this.shape_group = [small_shape, big_shape];
     this.replaceShape(this.two.makeGroup(small_shape, big_shape));
 
     super.init();
