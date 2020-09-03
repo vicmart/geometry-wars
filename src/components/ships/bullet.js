@@ -1,4 +1,5 @@
 import Ship from "./ship";
+import Explosion from "./../utilities/explosion";
 
 export default class Bullet extends Ship {
   constructor(x, y, two, map, targetDirection, extraSpeedX, extraSpeedY) {
@@ -38,10 +39,14 @@ export default class Bullet extends Ship {
 
     this.shape.rotation = this.targetRot;
 
-    super.init();
+    this.two.add(this.shape);
+
+    this.animateFunction = (frameCount) => { this.animate(frameCount)};
+    this.two.bind('update', this.animateFunction);
   }
 
   destruct() {
+    new Explosion(this.two, this.shape.translation.x, this.shape.translation.y, this.shape.stroke, 0.5);
     this.removeSelf();
     this.two.unbind('update', this.animateFunction);
     this.two.remove(this.shape);

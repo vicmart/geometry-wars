@@ -16,14 +16,16 @@ export default class Square extends Ship {
       new Two.Anchor(-20, 0),
       new Two.Anchor(0, -20),
       new Two.Anchor(20, 0),
-      new Two.Anchor(0, 20)
+      new Two.Anchor(0, 20),
+      new Two.Anchor(-20, 0)
     ], true, false);
   
     let big_shape = new Two.Path([
       new Two.Anchor(-20, -20),
       new Two.Anchor(20, -20),
       new Two.Anchor(20, 20),
-      new Two.Anchor(-20, 20)
+      new Two.Anchor(-20, 20),
+      new Two.Anchor(-20, -20)
     ], true, false);
     
     this.shape_group = [small_shape, big_shape];

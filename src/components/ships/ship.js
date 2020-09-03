@@ -36,6 +36,13 @@ export default class Ship {
 
   init() {
     this.two.add(this.shape);
+
+    this.animateFunction = (frameCount) => {
+      this.updateTarget();			
+      this.animate(frameCount);
+    };
+    
+    this.two.bind('update', this.animateFunction);
   }
 
   replaceShape(newPath) {
@@ -51,9 +58,11 @@ export default class Ship {
     this.shape.scale = oldShape.scale;
   }
 
-  updateTarget(p) {
-    this.targetX = p.shape.translation.x;  
-    this.targetY = p.shape.translation.y;
+  updateTarget() {
+    if (this.map && this.map.p1) {
+      this.targetX = this.map.p1.shape.translation.x;  
+      this.targetY = this.map.p1.shape.translation.y;
+    }
   }
 
 
@@ -64,6 +73,7 @@ export default class Ship {
     if (this.shape_group) {
       for (let path of this.shape_group) {
         verticies.push(...path.vertices);
+        verticies.push({filler: true});
       }
     }
 

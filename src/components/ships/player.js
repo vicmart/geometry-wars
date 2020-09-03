@@ -6,6 +6,7 @@ export default class Player extends Ship {
   constructor(x, y, two, map, controller) {
     super(x, y, two);
 
+    this.Player
     this.two.scene.translation.x = window.innerWidth/2 - x;
     this.two.scene.translation.y = window.innerHeight/2 - y;
 
@@ -16,7 +17,7 @@ export default class Player extends Ship {
     this.triggerAction = true;
     this.animating = false;
     this.animateStart = 0;
-    this.bulletRate = 100;
+    this.bulletRate = 75;
     this.activeBullets = [];
 
     this.map = map;
@@ -42,7 +43,11 @@ export default class Player extends Ship {
 
     this.shape.stroke = 'rgba(255, 255, 255, 1)';
 
-    super.init();
+    this.two.add(this.shape);
+
+    this.two.bind('update', (frameCount) => {
+      this.animate(frameCount);
+    });
   }
 
   animate(frames) {  
@@ -106,14 +111,10 @@ export default class Player extends Ship {
         let bullet1 = new Bullet(this.shape.translation.x + vector_from_center.x + (vector_perp_center.x * 1), this.shape.translation.y + vector_from_center.y + (vector_perp_center.y * 1) - 1, this.two, this.map, this.bulletRotation, move_x, move_y);
         this.activeBullets.push(bullet1);
         bullet1.removeSelf = () => { this.removeBullet(bullet1); }
-        bullet1.animateFunction = (frameCount) => { bullet1.animate(frameCount)};
-        this.two.bind('update', bullet1.animateFunction);
 
         let bullet2 = new Bullet(this.shape.translation.x + vector_from_center.x + (vector_perp_center.x * -1), this.shape.translation.y + vector_from_center.y + (vector_perp_center.y * -1) - 1, this.two, this.map, this.bulletRotation, move_x, move_y);
         this.activeBullets.push(bullet2);
         bullet2.removeSelf = () => { this.removeBullet(bullet2); }
-        bullet2.animateFunction = (frameCount) => { bullet2.animate(frameCount); }
-        this.two.bind('update', bullet2.animateFunction);
 
         this.bulletCooldown = now + this.bulletRate;
       }

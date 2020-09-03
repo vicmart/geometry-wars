@@ -10,7 +10,7 @@ import Pinwheel from './components/ships/pinwheel';
 import Square from './components/ships/square';
 import Envelope from './components/ships/envelope';
 import Arrow from './components/ships/arrow';
-import BasicMath from './components/utilities/math.js';
+import Explosion from './components/utilities/explosion.js';
 					
 
 window.onload = function() {
@@ -22,36 +22,23 @@ window.onload = function() {
 	let map = new Map(two);
 	let controller = new Controller();
 
+	let p1 = new Player(100, 100, two, map, controller);
+	map.p1 = p1;
+
 	let enemies = [new Square(300, 100, two, map),
 								new Pinwheel(300, 200, two, map),
 								new Envelope(200, 200, 1, two, map),
 								new Envelope(200, 300, 0.5, two, map),
 								new Arrow(300, 300, two, map)];
 	
-	for (let i = 0; i < 10; i++) {
+	for (let i = 0; i < 1000; i++) {
 		let [px, py] = [Math.random() * map.width, Math.random() * map.height];
-
 		enemies.push(new Diamond(px, py, two, map));
 	}
 
-	let p1 = new Player(100, 100, two, map, controller);
 	let ui = new UI(two, p1);
 	let lastSecond = new Date().getTime() / 1000;
 	let lastFrameCount = two.frameCount;
-
-
-	for (let i = 0; i < enemies.length; i++) {
-		let enemy = enemies[i];
-		enemy.animateFunction = (frameCount) => {
-			enemy.updateTarget(p1);			
-			enemy.animate(frameCount);
-		};
-		two.bind('update', enemies[i].animateFunction);
-	}
-
-	two.bind('update', function(frameCount) {
-		p1.animate(frameCount, map);
-	});
 
 	two.bind('update', function(frameCount) {
 		let seconds = new Date().getTime() / 1000;
@@ -63,6 +50,9 @@ window.onload = function() {
 
 		ui.animate(seconds);
 	});
+
+
+	//Collision detection, move to own class
 
 	let x_resolution = 200;
 	let y_resolution = 200;
@@ -137,6 +127,8 @@ window.onload = function() {
 							let dist_x = Math.abs(bullet_pos.x - enemy_pos.x);
 							let dist_y = Math.abs(bullet_pos.y - enemy_pos.y);
 							if (dist_x < enemy.size && dist_y < enemy.size) {
+								new Explosion(two, enemy_pos.x, enemy_pos.y, enemy.shape.stroke);
+								new Explosion(two, bullet_pos.x, bullet_pos.y, bullet.shape.stroke, 0.33);
 								bullet.destruct();
 								enemy.destruct();
 								enemies.remove(enemy);
