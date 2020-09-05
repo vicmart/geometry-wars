@@ -46,7 +46,6 @@ export default class Bullet extends Ship {
   }
 
   destruct() {
-    new Explosion(this.two, this.shape.translation.x, this.shape.translation.y, this.shape.stroke, 0.5);
     this.removeSelf();
     this.two.unbind('update', this.animateFunction);
     this.two.remove(this.shape);
@@ -54,6 +53,7 @@ export default class Bullet extends Ship {
     
   animate(frames) {
     if (!this.map.validPosition(this.shape.translation.x + this.move_x, this.shape.translation.y + this.move_y, this)) {
+      new Explosion(this.two, this.shape.translation.x, this.shape.translation.y, this.shape.stroke, 0.5);
       this.destruct();
       return true;
     }

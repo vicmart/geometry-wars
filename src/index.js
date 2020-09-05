@@ -31,7 +31,7 @@ window.onload = function() {
 								new Envelope(200, 300, 0.5, two, map),
 								new Arrow(300, 300, two, map)];
 	
-	for (let i = 0; i < 500; i++) {
+	for (let i = 0; i < 1000; i++) {
 		let [px, py] = [Math.random() * map.width, Math.random() * map.height];
 		enemies.push(new Diamond(px, py, two, map));
 	}
@@ -119,7 +119,7 @@ window.onload = function() {
 				let enemy_bucket = enemy_buckets[(y * x_buckets) + x];
 				let bullet_bucket = bullet_buckets[(y * x_buckets) + x];
 
-				if (enemy_bucket && enemy_bucket.length > 0 && bullet_bucket) {
+				if (enemy_bucket && enemy_bucket.length > 0 && bullet_bucket && bullet_bucket.length > 0) {
 					for (let bullet of bullet_bucket) {
 						for (let enemy of enemy_bucket) {
 							let bullet_pos = {x: bullet.shape.translation.x, y: bullet.shape.translation.y};
@@ -132,7 +132,8 @@ window.onload = function() {
 								bullet.destruct();
 								enemy.destruct();
 								enemies.remove(enemy);
-								bullets.remove(bullet);
+								enemy_bucket.remove(enemy);
+								bullet_bucket.remove(bullet);
 								break;
 							}
 						}
