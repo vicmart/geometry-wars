@@ -5,7 +5,7 @@ export default class Diamond extends Ship {
   constructor(x, y, two, map) {
     super(x, y, two, map);
 
-    this.size = 40;
+    this.size = 20;
     this.movementSpeedX = 0.002 + (Math.random() * 0.004);
     this.movementSpeedY = 0.002 + (Math.random() * 0.004);
     this.shape.stroke = 'cyan';

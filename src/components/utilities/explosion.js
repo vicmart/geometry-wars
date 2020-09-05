@@ -9,13 +9,13 @@ export default class Explosion {
     this.speed = 2 * this.scale;
     this.speed_spread = 1.5 * this.scale;
     this.color = color;
-    this.duration = 35 * this.scale;
+    this.duration = 25 * this.scale;
 
 		this.init();
   }
 
   init() {
-    let iteration = Math.PI / (16 * this.scale);
+    let iteration = Math.PI / (8 * this.scale);
     for (let r = 0; r < Math.PI * 2; r += iteration) {
       r += (iteration * Math.random()) - (iteration/2); 
       let size = ((Math.random() * 4) + 7) * this.scale;
