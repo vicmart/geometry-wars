@@ -1,15 +1,23 @@
 import BasicMath from './utilities/math.js';
-import Collision from './utilities/collision.js';
+import Two from 'twojs-ts';
 
 export default class Map {
   constructor(two) {
     this.two = two;
+
     this.alpha_config();
   }
 
   alpha_config() {
     this.width = 3000;
     this.height = 1800;
+
+    this.matrix = [];
+    this.matrix_metadata = [];
+    this.matrix_space = 75;
+
+    this.x_size = this.width / this.matrix_space;
+    this.y_size = this.height / this.matrix_space;
 
     this.shape = new Two.Path([
       new Two.Anchor(0, 0),
@@ -27,6 +35,10 @@ export default class Map {
     this.two.update();
 
     this.initializeBoundaries();
+
+    this.drawMatrix();
+
+    this.two.bind('update', () => { this.updateMatrix() });
   }
 
   initializeBoundaries() {
@@ -76,5 +88,47 @@ export default class Map {
     }
 
     return [move_x, move_y, targetX, targetY];
+  }
+
+  drawMatrix() {
+    for (let x = 0; x < this.x_size; x++) {
+      for (let y = 0; y < this.y_size; y++) {
+        let x_pos = x * this.matrix_space;
+        let y_pos = y * this.matrix_space;
+        let index = (y * this.x_size) + x;
+        this.matrix[index] = new Two.Ellipse(x_pos, y_pos, 2);
+        this.matrix[index].fill = 'rgb(50, 50, 50)';
+        this.matrix[index].stroke = 'rgb(50, 50, 50)';
+        this.matrix[index].linewidth = 2;
+        this.shape.scale = 1;
+        this.matrix_metadata[index] = { visible: false };
+      }
+    }
+  }
+
+  updateMatrix() {
+    let cameraBounds = this.two.camera.getBounds();
+    let x_min = parseInt(cameraBounds.min.x / this.matrix_space) - 1;
+    let x_max = parseInt(cameraBounds.max.x / this.matrix_space) + 1;
+    let y_min = parseInt(cameraBounds.min.y / this.matrix_space) - 1;
+    let y_max = parseInt(cameraBounds.max.y / this.matrix_space) + 1;
+    for (let x = Math.max(0, x_min); x < Math.min(x_max, this.x_size); x++) {
+      for (let y = Math.max(0, y_min); y < Math.min(y_max, this.y_size); y++) {
+        let x_pos = x * this.matrix_space;
+        let y_pos = y * this.matrix_space;
+        let index = (y * this.x_size) + x;
+        if (this.two.camera.visible(x_pos, y_pos, 0, 0)) {
+          if (!this.matrix_metadata[index].visible) {
+            this.two.add(this.matrix[index]);
+            this.matrix_metadata[index].visible = true;
+          }
+        } else {
+          if (this.matrix_metadata[index].visible) {
+            this.two.remove(this.matrix[index]);
+            this.matrix_metadata[index].visible = false;
+          }
+        }
+      }
+    }
   }
 }

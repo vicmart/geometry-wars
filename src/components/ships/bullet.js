@@ -39,6 +39,7 @@ export default class Bullet extends Ship {
 
     this.shape.rotation = this.targetRot;
 
+    this.visible = true;
     this.two.add(this.shape);
 
     this.animateFunction = (frameCount) => { this.animate(frameCount)};
@@ -47,6 +48,7 @@ export default class Bullet extends Ship {
 
   destruct() {
     this.removeSelf();
+    this.dying = true;
     this.two.unbind('update', this.animateFunction);
     this.two.remove(this.shape);
   }
@@ -60,6 +62,18 @@ export default class Bullet extends Ship {
 
     this.shape.translation.x += this.move_x;
     this.shape.translation.y += this.move_y;
+
+    if (this.two.camera.visible(this.shape.translation.x, this.shape.translation.y, this.size, this.size)) {
+      if (!this.visible && !this.dying) {
+        this.two.add(this.shape);
+        this.visible = true;
+      }
+    } else {
+      if (this.visible) {
+        this.two.remove(this.shape);
+        this.visible = false;
+      }
+    }
 
     return false;
   }

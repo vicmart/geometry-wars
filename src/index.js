@@ -10,7 +10,7 @@ import Pinwheel from './components/ships/pinwheel';
 import Square from './components/ships/square';
 import Envelope from './components/ships/envelope';
 import Arrow from './components/ships/arrow';
-import Explosion from './components/utilities/explosion.js';
+import Camera from './components/utilities/camera.js';
 					
 
 window.onload = function() {
@@ -18,6 +18,7 @@ window.onload = function() {
 	let elem = document.getElementById('field');
 	let params = { type: Two.Types.canvas, fullscreen: true };
 	let two = new Two(params).appendTo(elem);
+	two.camera = new Camera(two);
 
 	let map = new Map(two);
 	let controller = new Controller();
@@ -31,7 +32,7 @@ window.onload = function() {
 								new Envelope(200, 300, 0.5, two, map),
 								new Arrow(300, 300, two, map)];
 	
-	for (let i = 0; i < 1000; i++) {
+	for (let i = 0; i < 100; i++) {
 		let [px, py] = [Math.random() * map.width, Math.random() * map.height];
 		enemies.push(new Diamond(px, py, two, map));
 	}
@@ -51,117 +52,7 @@ window.onload = function() {
 		ui.animate(seconds);
 	});
 
-
-	//Collision detection, move to own class
-
-	let x_resolution = 200;
-	let y_resolution = 200;
-
-	let x_buckets = Math.ceil(map.width / x_resolution);
-	let y_buckets = Math.ceil(map.height / y_resolution);
-
-	let enemy_buckets = [];
-	let bullet_buckets = [];
-
-	two.bind('update', function(frameCount) {
-		let bullets = p1.activeBullets;
-
-		enemy_buckets = [];
-		bullet_buckets = [];
-
-		for (let bullet of bullets) {
-			let x_index = parseInt(bullet.shape.translation.x / x_resolution);
-			let y_index = parseInt(bullet.shape.translation.y / y_resolution);
-			let index = (y_index * x_buckets) + x_index;
-			if (!bullet_buckets[index]) bullet_buckets[index] = [];
-			bullet_buckets[index].push(bullet);
-		}
-
-		for (let enemy of enemies) {
-			let x_index = parseInt(enemy.shape.translation.x / x_resolution);
-			let y_index = parseInt(enemy.shape.translation.y / y_resolution);
-
-			let x_minus = false;
-			let x_plus = false;
-			if (enemy.shape.translation.x % x_resolution < enemy.size/2) {
-				enemy_buckets = addToNeighboringBucket(x_index, y_index, -1, 0, x_buckets, y_buckets, enemy_buckets, enemy);
-				x_minus = true;
-			} else if (x_resolution - (enemy.shape.translation.x % x_resolution) < enemy.size/2) {
-				enemy_buckets = addToNeighboringBucket(x_index, y_index, 1, 0, x_buckets, y_buckets, enemy_buckets, enemy);
-				x_plus = true;
-			}
-
-			if (enemy.shape.translation.y % y_resolution < enemy.size/2) {
-				enemy_buckets = addToNeighboringBucket(x_index, y_index, 0, -1, x_buckets, y_buckets, enemy_buckets, enemy);
-				if (x_minus) {
-					enemy_buckets = addToNeighboringBucket(x_index, y_index, -1, -1, x_buckets, y_buckets, enemy_buckets, enemy);
-				} else if (x_plus) {
-					enemy_buckets = addToNeighboringBucket(x_index, y_index, 1, -1, x_buckets, y_buckets, enemy_buckets, enemy);
-				}
-			} else if (y_resolution - (enemy.shape.translation.y % y_resolution) < enemy.size/2) {
-				enemy_buckets = addToNeighboringBucket(x_index, y_index, 0, 1, x_buckets, y_buckets, enemy_buckets, enemy);
-				if (x_minus) {
-					enemy_buckets = addToNeighboringBucket(x_index, y_index, -1, 1, x_buckets, y_buckets, enemy_buckets, enemy);
-				} else if (x_plus) {
-					enemy_buckets = addToNeighboringBucket(x_index, y_index, 1, 1, x_buckets, y_buckets, enemy_buckets, enemy);
-				}
-			}
-
-			let index = (y_index * x_buckets) + x_index;
-			if (!enemy_buckets[index]) enemy_buckets[index] = [];
-			enemy_buckets[index].push(enemy);
-		}
-	});
-
-	for (let x = 0; x < x_buckets; x++) {
-		for (let y = 0; y < y_buckets; y++) {
-			two.bind('update', function(frameCount) {
-				let enemy_bucket = enemy_buckets[(y * x_buckets) + x];
-				let bullet_bucket = bullet_buckets[(y * x_buckets) + x];
-
-				if (enemy_bucket && enemy_bucket.length > 0 && bullet_bucket && bullet_bucket.length > 0) {
-					for (let bullet of bullet_bucket) {
-						for (let enemy of enemy_bucket) {
-							let bullet_pos = {x: bullet.shape.translation.x, y: bullet.shape.translation.y};
-							let enemy_pos = {x: enemy.shape.translation.x, y: enemy.shape.translation.y};
-							let dist_x = Math.abs(bullet_pos.x - enemy_pos.x);
-							let dist_y = Math.abs(bullet_pos.y - enemy_pos.y);
-							if (dist_x < enemy.size && dist_y < enemy.size) {
-								new Explosion(two, enemy_pos.x, enemy_pos.y, enemy.shape.stroke);
-								//new Explosion(two, bullet_pos.x, bullet_pos.y, bullet.shape.stroke, 0.33);
-								bullet.destruct();
-								enemy.destruct();
-								enemies.remove(enemy);
-								enemy_bucket.remove(enemy);
-								bullet_bucket.remove(bullet);
-								break;
-							}
-						}
-					}
-				}
-			});
-		}
-	}
+	let collision = new Collision(two, map, p1, enemies);
 
 	two.play();
-};
-
-function addToNeighboringBucket(x, y, x_offset, y_offset, x_buckets, y_buckets, buckets, enemy) {
-	let alt_index = ((y + y_offset) * x_buckets) + (x + x_offset);
-
-	if (!buckets[alt_index]) buckets[alt_index] = [];
-	buckets[alt_index].push(enemy);
-
-	return buckets;
-}
-
-Array.prototype.remove = function() {
-	var what, a = arguments, L = a.length, ax;
-	while (L && this.length) {
-			what = a[--L];
-			while ((ax = this.indexOf(what)) !== -1) {
-					this.splice(ax, 1);
-			}
-	}
-	return this;
 };

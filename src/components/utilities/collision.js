@@ -1,62 +1,128 @@
 import BasicMath from '../utilities/math.js';
+import Explosion from './explosion.js';
 
 export default class Collision {
-  static pointInPolygonPadding(point, vs, padding) {
-    let px = parseFloat(point[0]), py = parseFloat(point[1]);
+  constructor(two, map, p1, enemies) {
+    this.two = two;
+    this.map = map;
+    this.p1 = p1;
+    this.enemies = enemies;
+
+    this.x_resolution = 200;
+    this.y_resolution = 200;
     
-    for (let i = 0; i < vs.length; i++) {
-      let x = parseFloat(vs[i][0]);
-      let y = parseFloat(vs[i][1]);
-      let nx = parseFloat(vs[0][0]);
-      let ny = parseFloat(vs[0][1]);
+    this.enemy_buckets = [];
+    this.bullet_buckets = [];
 
-      if (i < vs.length - 1) {
-        nx = parseFloat(vs[i + 1][0]);
-        ny = parseFloat(vs[i + 1][1]);                
-      }
+    this.init();
+  }
 
-      let closest_point = BasicMath.distToSegmentSquared({x: px, y: py}, {x: x, y: y}, {x: nx, y: ny});
-      let dist = Math.sqrt(BasicMath.dist2({x: px, y: py}, closest_point));
+  init() {
+    this.x_buckets = Math.ceil(this.map.width / this.x_resolution);
+    this.y_buckets = Math.ceil(this.map.height / this.y_resolution);
 
-      if (dist < padding) {
-        return false;
-      }
-    }
+    this.two.bind('update', (framecount) => { this.mainRoutine() });
 
-    return true;
-  };
-
-  static pointInPolygon(point, vs) {
-    let x = parseFloat(point[0]), y = parseFloat(point[1]);
-
-    let wn = 0;
-
-    for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-      let xi = parseFloat(vs[i][0]), yi = parseFloat(vs[i][1]);
-      let xj = parseFloat(vs[j][0]), yj = parseFloat(vs[j][1]);
-
-      if (yj <= y) {
-        if (yi > y) {
-          if (this.isLeft([xj, yj], [xi, yi], [x,y]) > 0) {
-            wn++;
-          }
-        }
-      } else {
-        if (yi <= y) {
-          if (this.isLeft([xj, yj], [xi, yi], [x, y]) < 0) {
-            wn--;
-          }
-        }
+    for (let x = 0; x < this.x_buckets; x++) {
+      for (let y = 0; y < this.y_buckets; y++) {
+        this.two.bind('update', (framecount) => { this.bucketSubroutine(x, y) });
       }
     }
+  }
 
-    return wn != 0;
-  };
+  mainRoutine() {
+    let bullets = this.p1.activeBullets;
 
+    this.enemy_buckets = [];
+    this.bullet_buckets = [];
+  
+    for (let bullet of bullets) {
+      let x_index = parseInt(bullet.shape.translation.x / this.x_resolution);
+      let y_index = parseInt(bullet.shape.translation.y / this.y_resolution);
+      let index = (y_index * this.x_buckets) + x_index;
+      if (!this.bullet_buckets[index]) this.bullet_buckets[index] = [];
+      this.bullet_buckets[index].push(bullet);
+    }
 
-  static isLeft(P0, P1, P2) {
-    let res = ( (P1[0] - P0[0]) * (P2[1] - P0[1])
-            - (P2[0] -  P0[0]) * (P1[1] - P0[1]) );
-    return res;
+    for (let enemy of this.enemies) {
+      let x_index = parseInt(enemy.shape.translation.x / this.x_resolution);
+      let y_index = parseInt(enemy.shape.translation.y / this.y_resolution);
+
+      let x_minus = false;
+      let x_plus = false;
+      if (enemy.shape.translation.x % this.x_resolution < enemy.size/2) {
+        this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, -1, 0, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
+        x_minus = true;
+      } else if (this.x_resolution - (enemy.shape.translation.x % this.x_resolution) < enemy.size/2) {
+        this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, 1, 0, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
+        x_plus = true;
+      }
+
+      if (enemy.shape.translation.y % this.y_resolution < enemy.size/2) {
+        this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, 0, -1, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
+        if (x_minus) {
+          this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, -1, -1, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
+        } else if (x_plus) {
+          this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, 1, -1, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
+        }
+      } else if (this.y_resolution - (enemy.shape.translation.y % this.y_resolution) < enemy.size/2) {
+        this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, 0, 1, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
+        if (x_minus) {
+          this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, -1, 1, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
+        } else if (x_plus) {
+          this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, 1, 1, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
+        }
+      }
+
+      let index = (y_index * this.x_buckets) + x_index;
+      if (!this.enemy_buckets[index]) this.enemy_buckets[index] = [];
+      this.enemy_buckets[index].push(enemy);
+    }
+  }
+
+  bucketSubroutine(x, y) {
+    let enemy_bucket = this.enemy_buckets[(y * this.x_buckets) + x];
+    let bullet_bucket = this.bullet_buckets[(y * this.x_buckets) + x];
+
+    if (enemy_bucket && enemy_bucket.length > 0 && bullet_bucket && bullet_bucket.length > 0) {
+      for (let bullet of bullet_bucket) {
+        for (let enemy of enemy_bucket) {
+          let bullet_pos = {x: bullet.shape.translation.x, y: bullet.shape.translation.y};
+          let enemy_pos = {x: enemy.shape.translation.x, y: enemy.shape.translation.y};
+          let dist_x = Math.abs(bullet_pos.x - enemy_pos.x);
+          let dist_y = Math.abs(bullet_pos.y - enemy_pos.y);
+          if (dist_x < enemy.size && dist_y < enemy.size) {
+            new Explosion(this.two, enemy_pos.x, enemy_pos.y, enemy.shape.stroke);
+            //new Explosion(this.two, bullet_pos.x, bullet_pos.y, bullet.shape.stroke, 0.33);
+            bullet.destruct();
+            enemy.destruct();
+            this.enemies.remove(enemy);
+            enemy_bucket.remove(enemy);
+            bullet_bucket.remove(bullet);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  addToNeighboringBucket(x, y, x_offset, y_offset, x_buckets, y_buckets, buckets, enemy) {
+    let alt_index = ((y + y_offset) * x_buckets) + (x + x_offset);
+  
+    if (!buckets[alt_index]) buckets[alt_index] = [];
+    buckets[alt_index].push(enemy);
+  
+    return buckets;
   }
 }
+
+Array.prototype.remove = function() {
+  var what, a = arguments, L = a.length, ax;
+  while (L && this.length) {
+      what = a[--L];
+      while ((ax = this.indexOf(what)) !== -1) {
+          this.splice(ax, 1);
+      }
+  }
+  return this;
+};

@@ -36,8 +36,20 @@ export default class Ship {
 
   init() {
     this.two.add(this.shape);
+    this.visible = true;
 
     this.animateFunction = (frameCount) => {
+      if (this.two.camera.visible(this.shape.translation.x, this.shape.translation.y, this.size, this.size)) {
+        if (!this.visible && !this.dying) {
+          this.two.add(this.shape);
+          this.visible = true;
+        }
+      } else {
+        if (this.visible) {
+          this.two.remove(this.shape);
+          this.visible = false;
+        }
+      }
       this.updateTarget();			
       this.animate(frameCount);
     };
@@ -64,7 +76,6 @@ export default class Ship {
       this.targetY = this.map.p1.shape.translation.y;
     }
   }
-
 
   destruct() {
     if (this.dying) return;
