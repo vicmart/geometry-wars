@@ -76,9 +76,39 @@ export default class Collision {
     let enemy_bucket = this.enemy_buckets[(y * this.x_buckets) + x];
     let bullet_bucket = this.bullet_buckets[(y * this.x_buckets) + x];
 
-    if (enemy_bucket && enemy_bucket.length > 0 && bullet_bucket && bullet_bucket.length > 0) {
+    let occupied_space = {};
+
+    if (!enemy_bucket || enemy_bucket.length === 0) return;
+    let space_size = enemy_bucket[0].size * 4;
+
+    if (bullet_bucket && bullet_bucket.length > 0) {
       for (let bullet of bullet_bucket) {
-        for (let enemy of enemy_bucket) {
+        let x_index = parseInt(bullet.shape.translation.x / space_size);
+        let y_index = parseInt(bullet.shape.translation.y / space_size);
+        if (!occupied_space[x_index]) occupied_space[x_index] = {}
+        if (!occupied_space[x_index][y_index]) occupied_space[x_index][y_index] = [];
+        occupied_space[x_index][y_index].push(bullet);
+      }
+
+      for (let enemy of enemy_bucket) {
+        let x_index = parseInt(enemy.shape.translation.x / space_size);
+        let y_index = parseInt(enemy.shape.translation.y / space_size);
+        if (occupied_space[x_index] && occupied_space[x_index][y_index]) {
+          new Explosion(this.two, enemy.shape.translation.x, enemy.shape.translation.y, enemy.shape.stroke);
+          for (let bullet of occupied_space[x_index][y_index]) {
+            bullet.destruct();
+            bullet_bucket.remove(bullet);
+          }
+          enemy.destruct();
+          this.enemies.remove(enemy);
+          enemy_bucket.remove(enemy);
+          break;
+        }
+      }
+
+      /**
+      for (let enemy of enemy_bucket) {
+        for (let bullet of bullet_bucket) {        
           let bullet_pos = {x: bullet.shape.translation.x, y: bullet.shape.translation.y};
           let enemy_pos = {x: enemy.shape.translation.x, y: enemy.shape.translation.y};
           let dist_x = Math.abs(bullet_pos.x - enemy_pos.x);
@@ -94,7 +124,7 @@ export default class Collision {
             break;
           }
         }
-      }
+      } */
     }
   }
 
