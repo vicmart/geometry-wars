@@ -32,11 +32,12 @@ export default class Ship {
     this.turnRadiusSq = this.turnRadius * this.turnRadius;
 
     this.skeleton = [];
+    this.visible = true;
+    this.garbage_collect = false;
   }
 
   init() {
     this.two.add(this.shape);
-    this.visible = true;
 
     this.animateFunction = (frameCount) => {
       if (this.two.camera.visible(this.shape.translation.x, this.shape.translation.y, this.size, this.size)) {
@@ -53,8 +54,6 @@ export default class Ship {
       this.updateTarget();			
       this.animate(frameCount);
     };
-    
-    this.two.bind('update', this.animateFunction);
   }
 
   replaceShape(newPath) {
@@ -119,7 +118,8 @@ export default class Ship {
   }
 
   garbageCollect() {
-    this.two.unbind('update', this.animateFunction);
+    this.garbage_collect = true;
+
     for (let path of this.skeleton) {
       this.two.remove(path);
     }
@@ -134,7 +134,7 @@ export default class Ship {
       path.translation.y -= y_diff != 0 ? (2 / y_diff) : 0;
       path.rotation += path.rotationSpeed;
       path.opacity = Math.max(0, (10 - Math.sqrt(Math.pow(path.initial_x - path.translation.x, 2) + Math.pow(path.initial_y - path.translation.y, 2))) / 10);
-      overall_opacity += path.opacity;
+      overall_opacity += path.opacity ? path.opacity : 0;
     }
 
     overall_opacity = overall_opacity / this.skeleton.length;

@@ -43,13 +43,12 @@ export default class Bullet extends Ship {
     this.two.add(this.shape);
 
     this.animateFunction = (frameCount) => { this.animate(frameCount)};
-    this.two.bind('update', this.animateFunction);
   }
 
   destruct() {
     this.removeSelf();
     this.dying = true;
-    this.two.unbind('update', this.animateFunction);
+    this.garbageCollect();
     this.two.remove(this.shape);
   }
     

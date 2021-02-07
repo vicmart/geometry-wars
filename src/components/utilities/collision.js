@@ -2,14 +2,14 @@ import BasicMath from '../utilities/math.js';
 import Explosion from './explosion.js';
 
 export default class Collision {
-  constructor(two, map, p1, enemies) {
+  constructor(two, map, p1, enemies = []) {
     this.two = two;
     this.map = map;
     this.p1 = p1;
     this.enemies = enemies;
 
-    this.x_resolution = 200;
-    this.y_resolution = 200;
+    this.x_resolution = 20;
+    this.y_resolution = 20;
     
     this.enemy_buckets = [];
     this.bullet_buckets = [];
@@ -48,30 +48,22 @@ export default class Collision {
       let x_index = parseInt(enemy.shape.translation.x / this.x_resolution);
       let y_index = parseInt(enemy.shape.translation.y / this.y_resolution);
 
-      let x_minus = false;
-      let x_plus = false;
-      if (enemy.shape.translation.x % this.x_resolution < enemy.size/2) {
-        this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, -1, 0, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
-        x_minus = true;
-      } else if (this.x_resolution - (enemy.shape.translation.x % this.x_resolution) < enemy.size/2) {
-        this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, 1, 0, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
-        x_plus = true;
+      let x_overlap = 0;
+      let y_overlap = 0;
+      if (enemy.shape.translation.x % this.x_resolution < enemy.size) {
+        x_overlap = -1;
+      } else if (this.x_resolution - (enemy.shape.translation.x % this.x_resolution) < enemy.size) {
+        x_overlap = 1;
       }
 
-      if (enemy.shape.translation.y % this.y_resolution < enemy.size/2) {
-        this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, 0, -1, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
-        if (x_minus) {
-          this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, -1, -1, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
-        } else if (x_plus) {
-          this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, 1, -1, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
-        }
-      } else if (this.y_resolution - (enemy.shape.translation.y % this.y_resolution) < enemy.size/2) {
-        this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, 0, 1, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
-        if (x_minus) {
-          this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, -1, 1, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
-        } else if (x_plus) {
-          this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, 1, 1, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
-        }
+      if (enemy.shape.translation.y % this.y_resolution < enemy.size) {
+        y_overlap = -1;
+      } else if (this.y_resolution - (enemy.shape.translation.y % this.y_resolution) < enemy.sizew) {
+        y_overlap = 1;
+      }
+
+      if (x_overlap != 0 || y_overlap != 0) {
+        this.enemy_buckets = this.addToNeighboringBucket(x_index, y_index, x_overlap, y_overlap, this.x_buckets, this.y_buckets, this.enemy_buckets, enemy);
       }
 
       let index = (y_index * this.x_buckets) + x_index;

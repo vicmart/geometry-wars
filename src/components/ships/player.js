@@ -1,6 +1,7 @@
 import Ship from './ship.js';
 import Bullet from './bullet.js';
 import BasicMath from '../utilities/math.js';
+import BulletController from '../utilities/bulletController.js';
 
 export default class Player extends Ship {
   constructor(x, y, two, map, controller) {
@@ -48,6 +49,8 @@ export default class Player extends Ship {
     this.two.bind('update', (frameCount) => {
       this.animate(frameCount);
     });
+
+    this.bullet_controller  = new BulletController(this.two, this.map);
   }
 
   animate(frames) {  
@@ -108,11 +111,11 @@ export default class Player extends Ship {
         let vector_from_center = {x: Math.cos(this.bulletRotation) * this.size/4, y: Math.sin(this.bulletRotation) * this.size/4};
         let vector_perp_center = BasicMath.perpendicular(vector_from_center);
 
-        let bullet1 = new Bullet(this.shape.translation.x + vector_from_center.x + (vector_perp_center.x * 1), this.shape.translation.y + vector_from_center.y + (vector_perp_center.y * 1) - 1, this.two, this.map, this.bulletRotation, move_x, move_y);
+        let bullet1 = this.bullet_controller.add(this.shape.translation.x + vector_from_center.x + (vector_perp_center.x * 1), this.shape.translation.y + vector_from_center.y + (vector_perp_center.y * 1) - 1, this.bulletRotation, move_x, move_y);
         this.activeBullets.push(bullet1);
         bullet1.removeSelf = () => { this.removeBullet(bullet1); }
 
-        let bullet2 = new Bullet(this.shape.translation.x + vector_from_center.x + (vector_perp_center.x * -1), this.shape.translation.y + vector_from_center.y + (vector_perp_center.y * -1) - 1, this.two, this.map, this.bulletRotation, move_x, move_y);
+        let bullet2 = this.bullet_controller.add(this.shape.translation.x + vector_from_center.x + (vector_perp_center.x * -1), this.shape.translation.y + vector_from_center.y + (vector_perp_center.y * -1) - 1, this.bulletRotation, move_x, move_y);
         this.activeBullets.push(bullet2);
         bullet2.removeSelf = () => { this.removeBullet(bullet2); }
 
