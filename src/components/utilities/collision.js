@@ -105,26 +105,27 @@ export default class Collision {
           break;
         }
       }
+    }
 
-      /**
-      for (let enemy of enemy_bucket) {
-        for (let bullet of bullet_bucket) {        
-          let bullet_pos = {x: bullet.shape.translation.x, y: bullet.shape.translation.y};
+    for (let enemy of enemy_bucket) {
+      for (let other_enemy of enemy_bucket) {
+        if (enemy !== other_enemy) {
           let enemy_pos = {x: enemy.shape.translation.x, y: enemy.shape.translation.y};
-          let dist_x = Math.abs(bullet_pos.x - enemy_pos.x);
-          let dist_y = Math.abs(bullet_pos.y - enemy_pos.y);
+          let other_enemy_pos = {x: other_enemy.shape.translation.x, y: other_enemy.shape.translation.y};
+          let dist_x = Math.abs(enemy_pos.x - other_enemy_pos.x);
+          let dist_y = Math.abs(enemy_pos.y - other_enemy_pos.y);
           if (dist_x < enemy.size && dist_y < enemy.size) {
-            new Explosion(this.two, enemy_pos.x, enemy_pos.y, enemy.shape.stroke);
-            //new Explosion(this.two, bullet_pos.x, bullet_pos.y, bullet.shape.stroke, 0.33);
-            bullet.destruct();
-            enemy.destruct();
-            this.enemies.remove(enemy);
-            enemy_bucket.remove(enemy);
-            bullet_bucket.remove(bullet);
-            break;
+            let overlap_x = enemy.size - dist_x;
+            let overlap_y = enemy.size - dist_y;
+            let direction_x = dist_x / Math.abs(dist_x);
+            let direction_y = dist_y / Math.abs(dist_y);
+            enemy.shape.translation.x += (direction_x * overlap_x * 0.5);
+            enemy.shape.translation.y += (direction_y * overlap_y * 0.5);
+            other_enemy.shape.translation.x += (direction_x * overlap_x * 0.5 * -1);
+            other_enemy.shape.translation.y += (direction_y * overlap_y * 0.5 * -1);
           }
         }
-      } */
+      }
     }
   }
 
