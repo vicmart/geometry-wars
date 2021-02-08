@@ -107,25 +107,54 @@ export default class Collision {
       }
     }
 
-    for (let enemy of enemy_bucket) {
-      for (let other_enemy of enemy_bucket) {
+    let overlaps = {};
+
+    for (let [index, enemy] of enemy_bucket.entries()) {
+      for (let [other_index, other_enemy] of enemy_bucket.entries()) {
         if (enemy !== other_enemy) {
           let enemy_pos = {x: enemy.shape.translation.x, y: enemy.shape.translation.y};
           let other_enemy_pos = {x: other_enemy.shape.translation.x, y: other_enemy.shape.translation.y};
           let dist_x = Math.abs(enemy_pos.x - other_enemy_pos.x);
           let dist_y = Math.abs(enemy_pos.y - other_enemy_pos.y);
           if (dist_x < enemy.size && dist_y < enemy.size) {
-            let overlap_x = enemy.size - dist_x;
-            let overlap_y = enemy.size - dist_y;
-            let direction_x = dist_x / Math.abs(dist_x);
-            let direction_y = dist_y / Math.abs(dist_y);
-            enemy.shape.translation.x += (direction_x * overlap_x * 0.5);
-            enemy.shape.translation.y += (direction_y * overlap_y * 0.5);
-            other_enemy.shape.translation.x += (direction_x * overlap_x * 0.5 * -1);
-            other_enemy.shape.translation.y += (direction_y * overlap_y * 0.5 * -1);
+            if (!overlaps[index]) overlaps[index] = [];
+            overlaps[index].push(other_index);
+
+            if (!overlaps[other_index]) overlaps[other_index] = [];
+            overlaps[other_index].push(index);
           }
         }
       }
+    }
+
+    for (let enemy_index in overlaps) {
+      let enemy = enemy_bucket[enemy_index];
+      let first_other_enemy = enemy_bucket[overlaps[enemy_index][0]];
+
+      let overlap_pos = {x: first_other_enemy.shape.translation.x, y: first_other_enemy.shape.translation.y};
+      let enemy_pos = {x: enemy.shape.translation.x, y: enemy.shape.translation.y};
+
+      let count = 1;
+
+      for (let i = 1; i < overlaps[enemy_index].length; i++) {
+        let other_enemy = enemy_bucket[overlaps[enemy_index][i]];
+
+        overlap_pos.x = ((overlap_pos.x * count) + other_enemy.shape.translation.x)/(count + 1);
+        overlap_pos.y = ((overlap_pos.y * count) + other_enemy.shape.translation.y)/(count + 1);
+
+        count++;
+      }
+
+      let dist_x = enemy_pos.x - overlap_pos.x;
+      let dist_y = enemy_pos.y - overlap_pos.y;
+
+      let overlap_x = enemy.size - dist_x;
+      let overlap_y = enemy.size - dist_y;
+      let direction_x = dist_x / Math.abs(dist_x);
+      let direction_y = dist_y / Math.abs(dist_y);
+      if (direction_x > 0) console.log('hey');
+      enemy.shape.translation.x += (direction_x * overlap_x * 0.1);
+      enemy.shape.translation.y += (direction_y * overlap_y * 0.1);
     }
   }
 
