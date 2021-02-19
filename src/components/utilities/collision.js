@@ -152,7 +152,7 @@ export default class Collision {
       let overlap_y = enemy.size - dist_y;
       let direction_x = dist_x / Math.abs(dist_x);
       let direction_y = dist_y / Math.abs(dist_y);
-      if (direction_x > 0) console.log('hey');
+      //if (direction_x > 0) console.log('hey');
       enemy.shape.translation.x += (direction_x * overlap_x * 0.1);
       enemy.shape.translation.y += (direction_y * overlap_y * 0.1);
     }
