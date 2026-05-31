@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack-dev-server --open",
-    "build": "webpack",
+    "start": "NODE_OPTIONS=--openssl-legacy-provider webpack-dev-server --open",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider webpack",
     "deploy": "git subtree push --prefix dist origin gh-pages"
   },
   "keywords": [],
